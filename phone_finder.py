@@ -5,19 +5,30 @@ from typing import Set
 
 
 class PhoneFinder:
+    len_local_phone = None
+    local_code = None
+    len_international_phone = None
+    international_code = None
 
-    local_code = '495'
-    international_code = '8'
-    len_local_phone = 7
-    len_international_phone = 11
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.__compiled = False
+
+    def compile_regexp(self):
+        re.purge()
+        pattern = self.get_pattern()
+        self.__regex = re.compile(pattern, re.MULTILINE)
+        self.__compiled = True
 
     def find(self, content: str) -> Set[str]:
         '''
         parse content and return list of 'raw' phones
         '''
-        pattern = self.__get_pattern()
+        if not self.__compiled:
+            self.compile_regexp()
+
         list_phones = list()
-        matches = re.finditer(pattern, content, re.MULTILINE)
+        matches = self.__regex.finditer(content)
         for match in matches:
             for i in range(3, 5):
                 raw_phone = match.group(i)
@@ -25,7 +36,7 @@ class PhoneFinder:
                     list_phones.append(raw_phone)
         return set(list_phones)
 
-    def __get_pattern(self) -> str:
+    def get_pattern(self) -> str:
         pattern = r'(>|^|\s)((\+?[78](?:[-() ]*\d){#len_international_phone#})|((?:[-]*\d){#len_local_phone#}))(<|$|\s)'
         pattern = pattern.replace(
                     '#len_international_phone#',
@@ -42,7 +53,15 @@ class PhoneFinder:
         '''
         clear 'raw' phone
         '''
-        self.__check_len()
+        def check_len(self):
+            len_local = len(self.international_code) \
+                        + len(self.local_code) \
+                        + self.len_local_phone \
+
+            if len_local != self.len_international_phone:
+                raise ValueError('Wrong local code length!')
+
+        check_len(self)
         phone = ''
         only_digit = ''.join(filter(str.isdigit, raw_phone))
         if len(only_digit) == self.len_local_phone:
@@ -50,19 +69,11 @@ class PhoneFinder:
         elif len(only_digit) == self.len_international_phone-len(self.international_code):
             phone = f'{self.international_code}{only_digit}'
         elif len(only_digit) == self.len_international_phone:
-            phone = f'{self.international_code}{only_digit[len(self.international_code:]}'
+            phone = f'{self.international_code}{only_digit[len(self.international_code):]}'
         else:
             raise ValueError('Wrong phone length!')
 
         return phone
-
-    def __check_len(self):
-        len_local = len(self.international_code) \
-                    + len(self.local_code) \
-                    + self.len_local_phone \
-
-        if len_local != self.len_international_phone:
-            raise ValueError('Wrong local code length!')
 
     def get_phones(self, content: str) -> Set[str]:
         '''
@@ -82,9 +93,13 @@ if __name__ == "__main__":
         'http://www.uralakva.ru/index.php?a=iv&id=4&pg_id=4'
     ]
 
-    pf = PhoneFinder()
-    pf.len_local_phone = 6
-    pf.local_code = '3532'
+    param = {
+        'len_local_phone': 6,
+        'local_code': '3532',
+        'len_international_phone': 11,
+        'international_code': "8",
+    }
+    pf = PhoneFinder(**param)
 
     for url in list_of_url:
         rs = requests.get(url)
