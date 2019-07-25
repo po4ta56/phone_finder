@@ -47,10 +47,10 @@ class PhoneFinder:
         only_digit = ''.join(filter(str.isdigit, raw_phone))
         if len(only_digit) == self.len_local_phone:
             phone = f'{self.international_code}{self.local_code}{only_digit}'
-        elif len(only_digit) == self.len_international_phone-1:
+        elif len(only_digit) == self.len_international_phone-len(self.international_code):
             phone = f'{self.international_code}{only_digit}'
         elif len(only_digit) == self.len_international_phone:
-            phone = f'{self.international_code}{only_digit[1:]}'
+            phone = f'{self.international_code}{only_digit[len(self.international_code:]}'
         else:
             raise ValueError('Wrong phone length!')
 
