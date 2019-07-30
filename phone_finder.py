@@ -15,7 +15,6 @@ class PhoneFinder:
         self.__compiled = False
 
     def compile_regexp(self):
-        re.purge()
         pattern = self.get_pattern()
         self.__regex = re.compile(pattern, re.MULTILINE)
         self.__compiled = True
@@ -79,7 +78,7 @@ class PhoneFinder:
         '''
         return the list of found normalized phones
         '''
-        return set(list(map(self.normalize, self.find(content))))
+        return set(map(self.normalize, self.find(content)))
 
 
 if __name__ == "__main__":
