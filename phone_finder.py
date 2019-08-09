@@ -78,4 +78,10 @@ class PhoneFinder:
         '''
         return the list of found normalized phones
         '''
-        return set(map(self.normalize, self.find(content)))
+        result = []
+        for raw_phone in self.find(content):
+            try:
+                result.append(self.normalize(raw_phone))
+            except:
+                pass
+        return set(result)
