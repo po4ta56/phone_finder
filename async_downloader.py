@@ -2,11 +2,11 @@
 import aiohttp
 import asyncio
 import requests
-import concurrent.futures
+
 
 from phone_finder import PhoneFinder
 
-urls = [
+list_urls = [
         'https://repetitors.info/',
         'https://hands.ru/company/about/',
         'http://сакмарскийрайон.рф/',
@@ -35,8 +35,7 @@ async def fetch(url, session):
             return url, None
             
 
-
-async def event_loop():
+async def get_phones(urls):
     phones = {}
     async with aiohttp.ClientSession() as session:
         pf = init_phone_finder()
@@ -55,42 +54,13 @@ async def event_loop():
                 else:
                     phones[url] = None
     return phones
-        
 
-def time_it(func):
-    def inner(*args, **kwargs):
-        start = time()
-        result = func(*args, **kwargs)
-        print('runtime:', time()-start)
-        return result
 
-    return inner
+def async_download(urls):
+    return asyncio.run(get_phones(urls))    
 
 
 if __name__ == "__main__":
-    from time import time
-
-    @time_it
-    def step_by_step_download():
-        phones = {}
-        pf = init_phone_finder()
-        for url in urls:
-            rs = requests.get(url)
-            if rs.status_code == 200:
-                phones[url] = pf.get_phones(rs.text)
-            
-        print(phones.items())
-
-
-    @time_it
-    def async_download():
-        
-        phones = asyncio.run(event_loop())
-        print(phones.items())
-
-
-    step_by_step_download()
-    print('\n')
-    async_download()
+    print(async_download(list_urls))
     
     
