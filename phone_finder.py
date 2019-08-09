@@ -1,4 +1,4 @@
-import requests
+
 import re
 
 from typing import Set
@@ -79,28 +79,3 @@ class PhoneFinder:
         return the list of found normalized phones
         '''
         return set(map(self.normalize, self.find(content)))
-
-
-if __name__ == "__main__":
-
-    list_of_url = [
-        'https://repetitors.info/',
-        'https://hands.ru/company/about/',
-        'http://сакмарскийрайон.рф/',
-        'http://сакмарскийрайон.рф/Pages.aspx?id=36',
-        'http://сакмарскийрайон.рф/Pages.aspx?id=535',
-        'http://www.uralakva.ru/index.php?a=iv&id=4&pg_id=4'
-    ]
-
-    param = {
-        'len_local_phone': 6,
-        'local_code': '3532',
-        'len_international_phone': 11,
-        'international_code': "8",
-    }
-    pf = PhoneFinder(**param)
-
-    for url in list_of_url:
-        rs = requests.get(url)
-        lsp = pf.get_phones(rs.text)
-        print(url, lsp)
